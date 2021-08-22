@@ -1,2 +1,0 @@
-
-	classroom *head = NULL;
