@@ -7,35 +7,110 @@ typedef struct Classroom
 	struct Classroom *next;
 } classroom;
 
+/**
+ * @brief Funcion para agregar nuevos nodos de tipo aula.
+ * 
+ * @param name 		El nombre del aula.
+ * @param capacity 	La capacidad del aula.
+ * @param head 		La referencia de la cabeza de la lista.
+ */
+
 void addClassroom(char *name, int capacity, classroom **head)
 {
-	classroom* newClassroom = (classroom*) malloc(sizeof(classroom));
-	classroom  *last  = *head;
-
+	classroom *newClassroom = (classroom *)malloc(sizeof(classroom));
+	classroom *last = *head;
 
 	newClassroom->name = name;
 	newClassroom->capacity = capacity;
 
-    if (*head == NULL)
-    {
-       (*head) = newClassroom;
+	if (*head == NULL)
+	{
+		(*head) = newClassroom;
 
-       return;
-    } 
+		return;
+	}
 
-    while (last->next != NULL)
-        last = last->next;
-  
-    last->next = newClassroom;
-    return;
+	while (last->next != NULL)
+		last = last->next;
+
+	last->next = newClassroom;
+	return;
 }
 
-void printClassrooms(classroom *head){
-	for(int i =0;head!= NULL; i++, head = head->next)
+/**
+ * @brief Obtiene objetos Classroom por indice.
+ * 
+ * @param index El indice del aula.
+ * @param head 	La cabeza de la lista de aulas.
+ * @return classroom* 
+ */
+classroom* getClassroom(int index, classroom *head){
+	for(int i =0; i <= index || head!=NULL; head = head->next, i++){
+		if(i == index)
+			return head;
+	}
+}
+
+/**
+ * @brief Elimina los nodos de tipo aula por indice.
+ * 
+ * @param index Indice a eliminar.
+ * @param head  La cabeza de la lista.
+ */
+void deleteClassroom(int index, classroom **head)
+{
+	classroom *current = (*head);
+	classroom *prev;
+	for (int i = 0; i <= index || current != NULL; i++, prev = current, current = current->next)
 	{
-		printf("##### %d  #####\n", i);
-		printf("%s \n",head->name);
-		printf("%d\n",head->capacity);
+		if (i == index)
+		{
+			if(index == 0){
+				(*head) = current->next;
+			}else{
+				prev->next = current->next;
+				current->next = NULL;
+			}
+
+			
+		}
+	}
+}
+
+/**
+ * @brief 
+ * 
+ * @param index 
+ * @param newName 
+ */
+void editClassroomName(int index, char* newName,classroom **head){
+	classroom *node = getClassroom(index,(*head));
+	node->name =newName;
+}
+
+/**
+ * @brief Edita la capacidad del aula
+ * 
+ * @param index 		indice del aula.
+ * @param newCapacity 	nueva capacidad del aula.
+ * @param head 			cabeza de la lista de aulas.
+ */
+void editClassroomCapacity(int index, int newCapacity, classroom **head){
+	classroom *node = getClassroom(index, (*head));
+	node->capacity = newCapacity;
+
+}
+
+/**
+ * @brief Imprime todos los nodos de una lista de tipo aula
+ * 
+ * @param head la cabeza de la lista.
+ */
+void printClassrooms(classroom *head)
+{
+	for (int i = 0; head != NULL; i++, head = head->next)
+	{
+		printf("[%d] Aula: %s | Capacidad: %d\n", i, head->name, head->capacity);
 	}
 	printf("\n\n");
 }
