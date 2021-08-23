@@ -2,7 +2,7 @@
 #define CLASSROOM_H
 typedef struct Classroom
 {
-	char *name;
+	char name[100];
 	int capacity;
 	struct Classroom *next;
 } classroom;
@@ -20,13 +20,12 @@ void addClassroom(char *name, int capacity, classroom **head)
 	classroom *newClassroom = (classroom *)malloc(sizeof(classroom));
 	classroom *last = *head;
 
-	newClassroom->name = name;
+	strcpy(newClassroom->name,name);
 	newClassroom->capacity = capacity;
 
 	if (*head == NULL)
 	{
 		(*head) = newClassroom;
-
 		return;
 	}
 
@@ -78,14 +77,14 @@ void deleteClassroom(int index, classroom **head)
 }
 
 /**
- * @brief 
+ * @brief Edita el nombre del aula
  * 
- * @param index 
- * @param newName 
+ * @param index 	Indice del profesor a editar.
+ * @param newName 	Nuevo nombre del profesor.
  */
 void editClassroomName(int index, char* newName,classroom **head){
 	classroom *node = getClassroom(index,(*head));
-	node->name =newName;
+	strcpy(node->name,newName);
 }
 
 /**
@@ -107,7 +106,7 @@ void editClassroomCapacity(int index, int newCapacity, classroom **head){
  * @param head la cabeza de la lista.
  */
 void printClassrooms(classroom *head)
-{
+{	
 	for (int i = 0; head != NULL; i++, head = head->next)
 	{
 		printf("[%d] Aula: %s | Capacidad: %d\n", i, head->name, head->capacity);
