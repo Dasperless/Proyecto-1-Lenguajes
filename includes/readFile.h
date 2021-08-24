@@ -8,24 +8,27 @@
  * @param line la linea a leer.
  * @param head Puntero al inicio de la lista.
  */
-void addClassroomFromFile(char* line, classroom **head){
+void addClassroomFromFile(char* line, list **head){
 	char* name = NULL;
 	int capacity = 0;
+	classroom *newClassroom = (classroom*)malloc(sizeof(classroom));
+	unsigned size = sizeof(classroom);
 	for(int i =0; i<2;i++){
 		switch (i)
 		{
 		case 0://Obtiene el nombre
 			name = strtok(line, ",");
-			// printf("%s",name);
+			strcpy(newClassroom->name,name);
 			break;
 		
 		case 1://Obtiene la capacidad
 			capacity = atoi(strtok(NULL, " "));
+			newClassroom->capacity=capacity;
 			break;
 		}
 	}
 	if(name != NULL && capacity != 0)
-		addClassroom(name,capacity,head);
+		push(head,newClassroom,size);
 }
 
 /**
@@ -34,12 +37,11 @@ void addClassroomFromFile(char* line, classroom **head){
  * @param fileName  Ruta del archivo
  * @param head 		Puntero al inicio de la lista.
  */
-void readClassroomFromFile(char* fileName, classroom **head){
+void readClassroomFromFile(char* fileName, list **head){
 	FILE *file= fopen(fileName, "r");
 	char line[256];
 	while (fgets(line,sizeof(line),file))
 	{
-		// printf("%s\n",line);
 		addClassroomFromFile(line,head);
 	}
 	fclose(file);
