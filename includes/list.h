@@ -112,15 +112,16 @@ void deleteNode(int index, list **head)
  * 
  * @param index El indice del aula.
  * @param head 	La cabeza de la lista de aulas.
- * @return classroom* 
+ * @return list* 
  */
-void *getNode(int index, list *head)
+void* getNode(int index, list *head)
 {
     for (int i = 0; i <= index || head != NULL; head = head->next, i++)
     {
         if (i == index)
             return head->data;
     }
+    return NULL;
 }
 
 #endif
