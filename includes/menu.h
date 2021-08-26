@@ -21,7 +21,7 @@ void printHeader(char *title);
 //Menu de periodos
 void delPeriodMenu();
 void addPeriodMenu();
-void InfPeriodeMenu();
+void InfoPeriodMenu();
 
 //Menu de cursos
 void delCourseMenu();
@@ -72,7 +72,7 @@ void OptOpeMenu()
 			InfoCourseMenu();
 			break;
 		case '4':
-			InfPeriodeMenu();
+			InfoPeriodMenu();
 			break;
 		case '5':
 			/* code */
@@ -97,7 +97,7 @@ void OptOpeMenu()
  * @brief Menu de informacion de cursos
  * 
  */
-void InfPeriodMenu(){
+void InfoPeriodMenu(){
 	int loop = 1;
 	do
 	{
@@ -111,7 +111,7 @@ void InfPeriodMenu(){
 			addPeriodMenu();
 			break;
 		case '2':
-			printList(periodList,printPeriods);
+			printList(periodList,printPeriod);
 			break;	
 		case '3':
 			delPeriodMenu();
@@ -136,7 +136,7 @@ void delPeriodMenu(){
 	printList(periodList,printCourses);
 	printf("\nIngrese el indice a borrar");
 	int index = inputInt();
-	period *node = getNode(index,&courseList);
+	period *node = getNode(index,courseList);
 
 	if(node == NULL){
 		printf("No existe el indice seleccionado");
@@ -159,7 +159,7 @@ void addPeriodMenu(){
 	int numStudents;
 	int index;
 
-	period *newPeriod->courseID = (period*)malloc(PERIOD_SIZE);
+	period *newPeriod = (period*)malloc(PERIOD_SIZE);
 	course *courseSelected;
 
 	printList(courseList,printCourses);
@@ -189,7 +189,7 @@ void addPeriodMenu(){
 	printf("\n>>");
 	scanf("%d", numStudents);	
 
-	strcpy(newPeriod->courseID,courseSelected->name);
+	strcpy(newPeriod->courseId,courseSelected->name);
 	newPeriod->year=year;
 	newPeriod->perid=perid;
 	strcpy(newPeriod->group,group);
@@ -243,7 +243,7 @@ void delCourseMenu(){
 	printList(courseList,printCourses);
 	printf("\nIngrese el indice a borrar");
 	int index = inputInt();
-	course *node = getNode(index,&courseList);
+	course *node = getNode(index,courseList);
 
 	if(node ==NULL){
 		printf("No existe el indice seleccionado");
@@ -325,7 +325,7 @@ void delTeacherMenu(){
 	printList(teacherList,printTeachers);
 	printf("\nIngrese el indice a borrar");
 	int index = inputInt();
-	teacher *node = getNode(index,&teacherList);
+	teacher *node = getNode(index,teacherList);
 
 	if(node ==NULL){
 		printf("No existe el indice seleccionado");
@@ -353,7 +353,7 @@ void addTeacherMenu(){
 	scanf("%d", id);
 
 	strcpy(newTeacher->name, name);
-	newTeacher->id = id;
+	newTeacher->idCard = id;
 
 	push(&teacherList,newTeacher,TEACHER_SIZE);
 }
@@ -411,7 +411,7 @@ void delClassroomMenu(){
 	printList(classroomList,printClassrooms);
 	printf("\nIngrese el indice a borrar");
 	int index = inputInt();
-	classroom *node = getNode(index,&classroomList);
+	classroom *node = getNode(index,classroomList);
 
 	if(node ==NULL){
 		printf("No existe el indice seleccionado");
@@ -463,9 +463,9 @@ char inputMenu()
  * @return int 
  */
 int inputInt(){
-	int option
+	int option;
 	printf("\n>>");
-	scanf(" %i", &option);
+	scanf(" %i", option);
 	return option;
 }
 

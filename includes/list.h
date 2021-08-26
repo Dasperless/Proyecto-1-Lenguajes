@@ -59,6 +59,17 @@ void printTeachers(void *teacherList)
 }
 
 /**
+ * @brief Imprime los nodos de tipo period
+ * 
+ * @param periodList Lista de nodos period.
+ */
+void printPeriod(void *periodList)
+{
+    period *p = (period *)periodList;
+    printf("Cod Curso: %s | anio: %d | periodo: %d\n | grupo %s | prefosor: %d | Num. Estudiantes: %d", p->courseId, p->year, p->perid, p->group, p->profesorId, p->numStudents);
+}
+
+/**
  * @brief Imprime nodos de tipo curso.
  * 
  * @param courseList la cabeza de la lista.
@@ -114,7 +125,7 @@ void deleteNode(int index, list **head)
  * @param head 	La cabeza de la lista de aulas.
  * @return list* 
  */
-void* getNode(int index, list *head)
+void *getNode(int index, list *head)
 {
     for (int i = 0; i <= index || head != NULL; head = head->next, i++)
     {
