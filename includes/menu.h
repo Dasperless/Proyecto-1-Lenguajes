@@ -165,16 +165,16 @@ void addPeriodMenu(){
 	printList(courseList,printCourses);
 	printf("Ingrese el indice del codigo del curso\n");	//Obtiene el codigo del curso
 	printf("\n>>");
-	scanf("%d", index);
+	scanf("%d", &index);
 	courseSelected = (course*) getNode(index,courseList);
 	
 	printf("Ingrese el anio\n"); 		//Ingresa el anio
 	printf("\n>>");
-	scanf("%d", year);
+	scanf("%d", &year);
 
 	printf("Ingrese el periodo\n"); 		//Ingresa el periodo
 	printf("\n>>");
-	scanf("%d", perid);
+	scanf("%d", &perid);
 
 	printf("Ingrese el group\n"); 		//Ingresa el grupo.
 	printf("\n>>");
@@ -183,11 +183,11 @@ void addPeriodMenu(){
 	printList(teacherList,printTeachers);
 	printf("Ingrese el indice del profesor\n");	
 	printf("\n>>");
-	scanf("%d", profesorId);	
+	scanf("%d", &profesorId);	
 
 	printf("Ingrese el numero de estudiantes\n");	
 	printf("\n>>");
-	scanf("%d", numStudents);	
+	scanf("%d", &numStudents);	
 
 	strcpy(newPeriod->courseId,courseSelected->name);
 	newPeriod->year=year;
@@ -350,7 +350,7 @@ void addTeacherMenu(){
 
 	printf("Ingrese la cedula del profesor\n"); //Obtiene el profesor.
 	printf("\n>>");
-	scanf("%d", id);
+	scanf("%d", &id);
 
 	strcpy(newTeacher->name, name);
 	newTeacher->idCard = id;
@@ -373,6 +373,7 @@ void InfoClassroomMenu()
 		printMaintMenu("aula",1);
 
 		char option = inputMenu();
+		printf("opcion: %d",option);
 		switch (option)
 		{
 		case '1':
@@ -437,7 +438,7 @@ void addClassroomMenu(){
 
 	printf("\nIngrese la capacidad");
 	printf("\n>>");
-	scanf("%d", capacity);
+	scanf("%d", &capacity);
 
 	strcpy(newClassroom->name,name);
 	newClassroom->capacity = capacity;
@@ -465,7 +466,7 @@ char inputMenu()
 int inputInt(){
 	int option;
 	printf("\n>>");
-	scanf(" %i", option);
+	scanf(" %i", &option);
 	return option;
 }
 
