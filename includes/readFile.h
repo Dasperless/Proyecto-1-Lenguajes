@@ -27,8 +27,12 @@ void addClassroomFromFile(char* line, list **head){
 			break;
 		}
 	}
-	if(name != NULL && capacity != 0)
+	if(name != NULL && capacity != 0){
+		char values[512];
+		snprintf(values, sizeof(values), "('%s', %d)",name,capacity);
+		insertOnDatabase("aulas","(nombre,capacidad)",values);
 		push(head,newClassroom,size);
+	}
 }
 
 /**

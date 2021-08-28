@@ -1,6 +1,8 @@
+#include <mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "includes/connection.h"
 #include "includes/structs/classroom.h"
 #include "includes/structs/teacher.h"
 #include "includes/structs/course.h"
@@ -8,7 +10,6 @@
 #include "includes/list.h"
 #include "includes/readFile.h"
 #include "includes/menu.h"
-
 int main()
 {
 	int loop = 1;

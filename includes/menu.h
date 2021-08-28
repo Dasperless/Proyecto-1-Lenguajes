@@ -111,7 +111,7 @@ void InfoPeriodMenu(){
 			addPeriodMenu();
 			break;
 		case '2':
-			printList(periodList,printPeriod);
+			printTable("periodos");
 			break;	
 		case '3':
 			delPeriodMenu();
@@ -151,7 +151,6 @@ void delPeriodMenu(){
  */
 void addPeriodMenu(){
 	//Falta agregar a la base de datos
-	char courseId[100] = {0};
 	int year;
 	int perid;
 	char group[100] = {0};
@@ -218,7 +217,7 @@ void InfoCourseMenu(){
 			addCourseMenu();
 			break;
 		case '2':
-			printList(courseList,printCourses);
+			printTable("corsos");
 			break;	
 		case '3':
 			delCourseMenu();
@@ -257,11 +256,9 @@ void delCourseMenu(){
  * 
  */
 void addCourseMenu(){
-	//Falta agregar a la base de datos
 	char careerId[100] = {0};
 	char courseId[100] = {0};
 	char name[100] = {0};
-	course *newCourse = (course*)malloc(COURSE_SIZE);
 
 	printf("Ingrese el codigo de la carrera\n");	//Obtiene el codigo de la carrera.
 	printf("\n>>");
@@ -271,15 +268,13 @@ void addCourseMenu(){
 	printf("\n>>");
 	scanf(" %99[^\n]%*[^\n]", courseId);
 
-	printf("Ingrese el codigo de curso\n"); 		//Obtiene el nombre del curso
+	printf("Ingrese el nombre del curso\n"); 		//Obtiene el nombre del curso
 	printf("\n>>");
 	scanf(" %99[^\n]%*[^\n]", name);
 
-	strcpy(newCourse->careerId, careerId);
-	strcpy(newCourse->courseId, courseId);
-	strcpy(newCourse->name, name);
-
-	push(&teacherList,newCourse,TEACHER_SIZE);	
+	char values[512];
+	snprintf(values, sizeof(values), "('%s', '%s', '%s')",careerId,courseId,name);
+	insertOnDatabase("cursos","(codigo_carrera,codigo_curso,nombre)",values);
 }
 
 /**
@@ -300,7 +295,7 @@ void InfoTeacherMenu(){
 			addTeacherMenu();
 			break;
 		case '2':
-			printList(teacherList,printTeachers);
+			printTable("profesores");
 			break;	
 		case '3':
 			delTeacherMenu();
@@ -342,8 +337,7 @@ void addTeacherMenu(){
 	//Falta agregar a la base de datos
 	char name[100] = {0};
 	int id;
-	teacher *newTeacher = (teacher*)malloc(TEACHER_SIZE);
-
+	
 	printf("Ingrese el nombre del profesor\n");	//Obtiene el nombre.
 	printf("\n>>");
 	scanf(" %99[^\n]%*[^\n]", name);
@@ -352,10 +346,9 @@ void addTeacherMenu(){
 	printf("\n>>");
 	scanf("%d", &id);
 
-	strcpy(newTeacher->name, name);
-	newTeacher->idCard = id;
-
-	push(&teacherList,newTeacher,TEACHER_SIZE);
+	char values[120];
+	snprintf(values, sizeof(values), "('%s', %d)",name,id);
+	insertOnDatabase("profesores","(nombre,cedula)",values);	
 }
 
 /**
@@ -373,7 +366,6 @@ void InfoClassroomMenu()
 		printMaintMenu("aula",1);
 
 		char option = inputMenu();
-		printf("opcion: %d",option);
 		switch (option)
 		{
 		case '1':
@@ -387,7 +379,7 @@ void InfoClassroomMenu()
 			addClassroomMenu();
 			break;	
 		case '3':
-			printList(classroomList,printClassrooms);
+			printTable("aulas");
 			break;	
 		case '4':
 			delClassroomMenu();
@@ -427,8 +419,6 @@ void delClassroomMenu(){
  * 
  */
 void addClassroomMenu(){
-	//Falta agregar a la base de datos
-	classroom *newClassroom = (classroom*)malloc(CLASSROOM_SIZE);
 	char name[100] ={0};
 	int capacity;
 
@@ -440,9 +430,10 @@ void addClassroomMenu(){
 	printf("\n>>");
 	scanf("%d", &capacity);
 
-	strcpy(newClassroom->name,name);
-	newClassroom->capacity = capacity;
-	push(&classroomList,newClassroom,CLASSROOM_SIZE);
+	char values[120];
+	snprintf(values, sizeof(values), "('%s', %d)",name,capacity);
+	insertOnDatabase("aula","(nombre,capacidad)",values);	
+
 }
 
 /**
