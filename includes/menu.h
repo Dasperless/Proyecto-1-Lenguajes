@@ -18,6 +18,8 @@ int inputInt();
 void printMaintMenu(char* functTitle, int startNum);
 void printHeader(char *title);
 
+void ReserveClassroomMenu();
+
 //Menu de periodos
 void delPeriodMenu();
 void addPeriodMenu();
@@ -75,7 +77,7 @@ void OptOpeMenu()
 			InfoPeriodMenu();
 			break;
 		case '5':
-			/* code */
+			ReserveClassroomMenu();
 			break;
 		case '6':
 			/* code */
@@ -93,6 +95,7 @@ void OptOpeMenu()
 	} while (loop);
 }
 
+
 /**
  * @brief Menu de informacion de cursos
  * 
@@ -101,7 +104,7 @@ void InfoPeriodMenu(){
 	int loop = 1;
 	do
 	{
-		printHeader("Informacion de periodo");
+		printHeader("Informacion de curso por periodo");
 		printMaintMenu("periodo",0);
 
 		char option = inputMenu();
@@ -111,7 +114,7 @@ void InfoPeriodMenu(){
 			addPeriodMenu();
 			break;
 		case '2':
-			printTable("periodos");
+			printFormatedTable("periodx");
 			break;	
 		case '3':
 			delPeriodMenu();
@@ -135,14 +138,14 @@ void delPeriodMenu(){
 	//Falta eliminar a la base de datos
 	printList(periodList,printCourses);
 	printf("\nIngrese el indice a borrar");
-	int index = inputInt();
-	period *node = getNode(index,courseList);
+	int id = inputInt();
 
-	if(node == NULL){
-		printf("No existe el indice seleccionado");
-		return;
-	}
-	deleteNode(index,&courseList);
+	char values[16];
+	snprintf(values, sizeof(values), "%d",id);
+	
+	if(callStoredProcedureOutput("SP_DeleteCourseByPeriod",values) < 0)
+		printf("No existe el id del curso en este periodo");
+	
 }
 
 /**
@@ -151,51 +154,50 @@ void delPeriodMenu(){
  */
 void addPeriodMenu(){
 	//Falta agregar a la base de datos
-	int year;
-	int perid;
+	char courseCode[100] = {0};
+	char year[100];
+	int period;
 	char group[100] = {0};
-	int profesorId;
+	char teacher[100];
 	int numStudents;
-	int index;
 
-	period *newPeriod = (period*)malloc(PERIOD_SIZE);
-	course *courseSelected;
-
-	printList(courseList,printCourses);
-	printf("Ingrese el indice del codigo del curso\n");	//Obtiene el codigo del curso
+	printf("Ingrese el codigo del curso\n");	//Obtiene el codigo del curso
 	printf("\n>>");
-	scanf("%d", &index);
-	courseSelected = (course*) getNode(index,courseList);
+	scanf("%s", courseCode);
 	
 	printf("Ingrese el anio\n"); 		//Ingresa el anio
 	printf("\n>>");
-	scanf("%d", &year);
+	scanf("%d", year);
 
 	printf("Ingrese el periodo\n"); 		//Ingresa el periodo
 	printf("\n>>");
-	scanf("%d", &perid);
+	scanf("%d", &period);
 
 	printf("Ingrese el group\n"); 		//Ingresa el grupo.
 	printf("\n>>");
 	scanf(" %99[^\n]%*[^\n]", group);
 
-	printList(teacherList,printTeachers);
-	printf("Ingrese el indice del profesor\n");	
+	printf("Ingrese el nombre del profesor\n");	
 	printf("\n>>");
-	scanf("%d", &profesorId);	
+	scanf("%s", teacher);	
 
 	printf("Ingrese el numero de estudiantes\n");	
 	printf("\n>>");
 	scanf("%d", &numStudents);	
 
-	strcpy(newPeriod->courseId,courseSelected->name);
-	newPeriod->year=year;
-	newPeriod->perid=perid;
-	strcpy(newPeriod->group,group);
-	newPeriod->profesorId = profesorId;
-	newPeriod->numStudents = numStudents;
-
-	push(&courseList,newPeriod,PERIOD_SIZE);	
+	char values[512];
+	snprintf(values, sizeof(values), "'%s', '%s', %d, '%s', '%s', %d",courseCode,year,period,group,teacher,numStudents);
+	int result = callStoredProcedureOutput("SP_InsertCourseByPeriod",values);
+	if(result == -1){ 
+		printf("ya existe un curso con el mismo anio o grupo en este periodo");
+	}else if (result == -2)
+	{
+		printf("existe un curso con el mismo codigo de curso.");
+		
+	}else{
+		printf("Se inserto con exito");
+	}
+	
 }
 
 
@@ -217,7 +219,7 @@ void InfoCourseMenu(){
 			addCourseMenu();
 			break;
 		case '2':
-			printTable("corsos");
+			printTable("cursos");
 			break;	
 		case '3':
 			delCourseMenu();
@@ -238,17 +240,13 @@ void InfoCourseMenu(){
  * 
  */
 void delCourseMenu(){
-	//Falta eliminar a la base de datos
-	printList(courseList,printCourses);
+	printFormatedTable("SP_DeleteCourseById");
 	printf("\nIngrese el indice a borrar");
-	int index = inputInt();
-	course *node = getNode(index,courseList);
+	int id = inputInt();
 
-	if(node ==NULL){
-		printf("No existe el indice seleccionado");
-		return;
-	}
-	deleteNode(index,&courseList);
+	char values[128];
+	snprintf(values, sizeof(values), "'%d'",id);
+	callStoredProcedure("SP_InsertCourse",values);	
 }
 
 /**
@@ -273,8 +271,8 @@ void addCourseMenu(){
 	scanf(" %99[^\n]%*[^\n]", name);
 
 	char values[512];
-	snprintf(values, sizeof(values), "('%s', '%s', '%s')",careerId,courseId,name);
-	insertOnDatabase("cursos","(codigo_carrera,codigo_curso,nombre)",values);
+	snprintf(values, sizeof(values), "'%s', '%s', '%s'",careerId,courseId,name);
+	callStoredProcedure("SP_InsertCourse",values);
 }
 
 /**
@@ -316,17 +314,8 @@ void InfoTeacherMenu(){
  * 
  */
 void delTeacherMenu(){
-	//Falta eliminar a la base de datos
-	printList(teacherList,printTeachers);
-	printf("\nIngrese el indice a borrar");
-	int index = inputInt();
-	teacher *node = getNode(index,teacherList);
-
-	if(node ==NULL){
-		printf("No existe el indice seleccionado");
-		return;
-	}
-	deleteNode(index,&classroomList);
+	callStoredProcedure("SP_DeleteTeachers"," ");
+	printf("Se han borrado todos los profesores\n");
 }
 
 /**
@@ -334,7 +323,6 @@ void delTeacherMenu(){
  * 
  */
 void addTeacherMenu(){
-	//Falta agregar a la base de datos
 	char name[100] = {0};
 	int id;
 	
@@ -346,9 +334,9 @@ void addTeacherMenu(){
 	printf("\n>>");
 	scanf("%d", &id);
 
-	char values[120];
-	snprintf(values, sizeof(values), "('%s', %d)",name,id);
-	insertOnDatabase("profesores","(nombre,cedula)",values);	
+	char values[512];
+	snprintf(values, sizeof(values), "'%s', %d",name,id);
+	callStoredProcedure("SP_InsertTeacher",values);
 }
 
 /**
@@ -379,7 +367,7 @@ void InfoClassroomMenu()
 			addClassroomMenu();
 			break;	
 		case '3':
-			printTable("aulas");
+			printFormatedTable("classroom");
 			break;	
 		case '4':
 			delClassroomMenu();
@@ -401,16 +389,16 @@ void InfoClassroomMenu()
  */
 void delClassroomMenu(){
 	//Falta eliminar a la base de datos
-	printList(classroomList,printClassrooms);
+	printTable("teacher");
 	printf("\nIngrese el indice a borrar");
-	int index = inputInt();
-	classroom *node = getNode(index,classroomList);
+	int id = inputInt();
 
-	if(node ==NULL){
-		printf("No existe el indice seleccionado");
-		return;
-	}
-	deleteNode(index,&classroomList);
+	char values[120];
+	snprintf(values, sizeof(values), "%d",id);
+	if(callStoredProcedureOutput("SP_DeleteClassroomById",values)<0) 
+		printf("No existe el id ");
+
+	printFormatedTable("classroom");
 	
 }
 
@@ -431,9 +419,8 @@ void addClassroomMenu(){
 	scanf("%d", &capacity);
 
 	char values[120];
-	snprintf(values, sizeof(values), "('%s', %d)",name,capacity);
-	insertOnDatabase("aula","(nombre,capacidad)",values);	
-
+	snprintf(values, sizeof(values), "'%s', %d",name,capacity);
+	callStoredProcedure("SP_InsertTeacher",values);	
 }
 
 /**

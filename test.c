@@ -6,6 +6,8 @@
 
 int main(int argc, char const *argv[])
 {
-	storedProcedure();
+
+	int i = callStoredProcedureOutput("SP_InsertCurseByPeriod","'dsadsa', 2021, 1, 'dsada','dasdsa',1");
+	printf("%d",i);
 	return 0;
 }
