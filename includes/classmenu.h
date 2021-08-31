@@ -26,8 +26,7 @@ void InfoClassroomMenu()
 			printf("Ingrese el la ruta del archivo .txt\n");
 			printf("\n>>");
 			scanf(" %1023[^\n]%*[^\n]", path);
-			readClassroomFromFile(path,&classroomList);
-			printList(classroomList,printClassrooms);
+			readClassroomFromFile(path);
 			break;
 		case '2':
 			addClassroomMenu();

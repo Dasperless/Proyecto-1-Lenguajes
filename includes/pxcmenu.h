@@ -44,8 +44,7 @@ void InfoPeriodMenu(){
  * 
  */
 void delPeriodMenu(){
-	//Falta eliminar a la base de datos
-	printList(periodList,printCourses);
+	printFormatedTable("periodxcourse");
 	printf("\nIngrese el indice a borrar");
 	int id = inputInt();
 

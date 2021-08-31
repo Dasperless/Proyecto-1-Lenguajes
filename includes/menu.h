@@ -6,11 +6,6 @@ const int TEACHER_SIZE = sizeof(teacher);
 const int PERIOD_SIZE = sizeof(period);
 const int COURSE_SIZE = sizeof(course);
 
-list *classroomList = NULL;
-list *periodList = NULL;
-list *teacherList = NULL;
-list *courseList = NULL;
-
 char *inputString();
 char inputMenu();
 int inputInt();
