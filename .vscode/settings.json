@@ -1,0 +1,14 @@
+{
+	"files.associations": {
+		"typeinfo": "cpp",
+		"readfile.h": "c",
+		"course.h": "c",
+		"*.tcc": "c",
+		"classroom.h": "c",
+		"stdio.h": "c",
+		"teacher.h": "c",
+		"coursemenu.h": "c",
+		"teachermenu.h": "c",
+		"menu.h": "c"
+	}
+}

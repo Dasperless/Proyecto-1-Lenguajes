@@ -155,6 +155,7 @@ void printStoredProcedure(char *sp)
 {
   char query[512] = {0};
   snprintf(query, 512, "CALL %s", sp);
+  printf("%s\n",query);
   MYSQL *con = mysql_init(NULL);
 
   if (con == NULL)

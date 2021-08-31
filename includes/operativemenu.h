@@ -41,7 +41,7 @@ void OptOpeMenu()
 			cancelReservationMenu();
 			break;
 		case '7':
-			/* code */
+			statisticsMenu();
 			break;
 		case '8':
 			loop = 0;
