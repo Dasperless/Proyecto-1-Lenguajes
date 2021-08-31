@@ -21,7 +21,7 @@ void printFormatedTable(char table[])
 
   if (strcmp(table, "teacher") == 0)
   {
-    printf("Id\t\tCedula\t\tNombre\n");
+    printf("Id\t\tCedula\t\t\tNombre\n");
   }
   else if (strcmp(table, "classroom") == 0)
   {
@@ -249,6 +249,7 @@ int callStoredProcedureOutput(char *sp, char *values)
   {
     finish_with_error(con);
   }
+  
   if (mysql_query(con, query))
   {
     finish_with_error(con);

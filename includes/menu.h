@@ -1,11 +1,6 @@
 #ifndef MENU_H
 #define MENU_H
 
-const int CLASSROOM_SIZE = sizeof(classroom);
-const int TEACHER_SIZE = sizeof(teacher);
-const int PERIOD_SIZE = sizeof(period);
-const int COURSE_SIZE = sizeof(course);
-
 char *inputString();
 char inputMenu();
 int inputInt();

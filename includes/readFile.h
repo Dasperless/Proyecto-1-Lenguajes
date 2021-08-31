@@ -8,26 +8,24 @@
  */
 void addClassroomFromFile(char *line)
 {
-	char *name = NULL;
-	int capacity = 0;
-	classroom *newClassroom = (classroom *)malloc(sizeof(classroom));
+	classroom newClassroom;
 	for (int i = 0; i < 2; i++)
 	{
 		switch (i)
 		{
 		case 0: //Obtiene el nombre
-			strcpy(newClassroom->name, strtok(line, ","));
+			strcpy(newClassroom.name, strtok(line, ","));
 			break;
 
 		case 1: //Obtiene la capacidad
-			newClassroom->capacity = atoi(strtok(NULL, " "));
+			newClassroom.capacity = atoi(strtok(NULL, " "));
 			break;
 		}
 	}
-	if (name != NULL && capacity != 0)
+	if (newClassroom.name != NULL && newClassroom.capacity != 0)
 	{
 		char values[512];
-		snprintf(values, sizeof(values), "'%s', %d", newClassroom->name, newClassroom->capacity);
+		snprintf(values, sizeof(values), "'%s', %d", newClassroom.name, newClassroom.capacity);
 		callStoredProcedure("SP_InsertClassroom", values);
 	}
 }

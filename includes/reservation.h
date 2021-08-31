@@ -28,25 +28,28 @@ int askNewReservation()
 {
 	printf("1.) Ingresar una nueva reservación\n");
 	printf("2.) volver\n");
-	int option;
+	char option;
+	int ret;
 	int incorrect = 0;
 	do
 	{
 		incorrect = 0;
-		option = inputInt();
+		option = inputMenu();
+
 		switch (option)
 		{
-		case 1:
-			option = 1;
+		case '1':
+			ret = 1;
 			break;
-		case 2:
-			option = 0;
+		case '2':
+			ret = 0;
+			break;
 		default:
 			incorrect = 1;
 			break;
 		}
 	} while (incorrect);
-	return option;
+	return ret;
 }
 
 /**
@@ -104,28 +107,23 @@ void ReserveClassroomMenu()
 		printFormatedTable("classroom");
 		printf("\nIngrese el nombre del aula: ");
 		scanf(" %99[^\n]%*[^\n]", classroomName);
-		// fgets(classroomName, 100, stdin);
 
 		__fpurge(stdin);
 		printf("\nIngrese el anio: ");
-		// fgets(yearChar, 10, stdin);
 		scanf(" %99[^\n]%*[^\n]", yearChar);
 
 
 		__fpurge(stdin);
 		printf("\nIngrese el periodo: ");
-		// fgets(period, 3, stdin);
 		scanf(" %2[^\n]%*[^\n]", period);
 		
 
 		printFormatedTable("course");
 		printf("\nIngrese el codigo del curso: ");
-		// fgets(courseCode, 100, stdin);
 		scanf(" %99[^\n]%*[^\n]", courseCode);
 
 
 		printf("\nIngrese el grupo: ");
-		// fgets(group, 100, stdin);
 		scanf(" %99[^\n]%*[^\n]", group);
 
 

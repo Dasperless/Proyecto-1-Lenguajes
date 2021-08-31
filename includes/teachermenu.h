@@ -58,8 +58,6 @@ void delTeacherMenu()
 void addTeacherMenu()
 {
 	teacher newTeacher;
-	char name[100] = {0};
-	int id;
 
 	printf("Ingrese el nombre del profesor\n"); //Obtiene el nombre.
 	printf("\n>>");
