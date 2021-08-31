@@ -4,40 +4,58 @@ char *user = "root";
 char *password = "Proyecto_1_Lenguajes"; /* set me first */
 char *database = "proyecto-1";
 
+void finish_with_error(MYSQL *con);
+void callStoredProcedure(char *sp, char *values);
+int callStoredProcedureOutput(char *sp, char *values);
+
+void printStoredProcedure(char *sp);
+void printTable(char *table);
+void printFormatedTable(char table[]);
+/**
+ * @brief Imprime con encabezado las tablas
+ * 
+ * @param table la tabla a imprimir
+ */
 void printFormatedTable(char table[])
 {
 
-  if (table == "teacher")
+  if (strcmp(table, "teacher") == 0)
   {
-    printf("Id\t\t cedula\t\t nombre\n");
-    
+    printf("Id\t\tCedula\t\tNombre\n");
   }
-  else if (table == "classroom")
+  else if (strcmp(table, "classroom") == 0)
   {
-    printf("Id\t\t nombre\t\t capacidad\n");
+    printf("Id\t\tNombre\t\tCapacidad\n");
   }
-  else if (table == "course")
+  else if (strcmp(table, "course") == 0)
   {
-    printf("Id\t\t codigo de carrera\t\t codigo de curso\n");
+    printf("Id\t\tCod.carrera\t\tCod.curso\t\tnombre\n");
   }
-  else if (table == "periodxcourse")
+  else if (strcmp(table, "periodxcourse") == 0)
   {
-    printf("Id\t\t id \t\t codigo de curso\t\t anio\t\t periodo\t\t grupo \t\t profesor\t\t cantidad de estudiantes\n");
-    //Colocar otro print
-
+    printf("Id\t\tCod.curso\tanio\t\tperiodo\t\tgrupo\t\tprofesor\t\tcant.estudiantes\n");
+    printStoredProcedure("SP_PrintPeriodxCourse");
+    return;
   }
-  else if (table == "reservation")
+  else if (strcmp(table, "reservation") == 0)
   {
-    printf("Id\t\t fecha\t\t hora inicio\t\t hora fin\t\t aula \t\t curso\t\t \n");
-    //colocar otro print
-
-  }else{
+    printf("Id\t\tfecha\t\t\thora inicio\t\thora fin\t\taula\t\tanio\t\tperiodo\t\tcod.curso\tgrupo\n");
+    printStoredProcedure("SP_PrintReservation");
+    return;
+  }
+  else
+  {
     printf("No existe la tabla\n");
-  } 
+    return;
+  }
   printTable(table);
-
 }
 
+/**
+ * @brief Imprime errores de una consulta
+ * 
+ * @param con la conexión 
+ */
 void finish_with_error(MYSQL *con)
 {
   fprintf(stderr, "%s\n", mysql_error(con));
@@ -80,12 +98,63 @@ int insertOnDatabase(char *table, char *columns, char *values)
 /**
  * @brief Imprime los datos de una tabla de la base de datos
  * 
- * @param table La tabla a imprimir.
+ * @param sp La tabla a imprimir.
  */
 void printTable(char *table)
 {
   char query[512] = {0};
   snprintf(query, 512, "SELECT * FROM %s", table);
+  MYSQL *con = mysql_init(NULL);
+
+  if (con == NULL)
+  {
+    fprintf(stderr, "mysql_init() failed\n");
+  }
+
+  if (mysql_real_connect(con, server, user, password,
+                         database, 0, NULL, 0) == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  if (mysql_query(con, query))
+  {
+    finish_with_error(con);
+  }
+
+  MYSQL_RES *result = mysql_store_result(con);
+
+  if (result == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  int num_fields = mysql_num_fields(result);
+
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result)))
+  {
+    for (int i = 0; i < num_fields; i++)
+    {
+      printf("%s\t\t", row[i] ? row[i] : "NULL");
+    }
+
+    printf("\n");
+  }
+
+  mysql_free_result(result);
+  mysql_close(con);
+}
+
+/**
+ * @brief Imprime el stored procedure
+ * 
+ * @param sp El procedimiento
+ */
+void printStoredProcedure(char *sp)
+{
+  char query[512] = {0};
+  snprintf(query, 512, "CALL %s", sp);
   MYSQL *con = mysql_init(NULL);
 
   if (con == NULL)
@@ -157,12 +226,19 @@ void callStoredProcedure(char *sp, char *values)
   mysql_close(con);
 }
 
+/**
+ * @brief LLama un procedimiento almacenado con un solo output.
+ * 
+ * @param sp      el procedimiento almacenado.
+ * @param values  los valores del procedimiento.
+ * @return int    el output del procedimiento.
+ */
 int callStoredProcedureOutput(char *sp, char *values)
 {
   char query[512] = {0};
   char output[4] = {0};
   snprintf(query, 512, "CALL %s (%s,@output)", sp, values);
-
+  printf("%s\n", query);
   MYSQL *con = mysql_init(NULL);
   if (con == NULL)
   {

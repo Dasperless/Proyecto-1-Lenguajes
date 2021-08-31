@@ -1,5 +1,6 @@
 #include <mysql.h>
 #include <stdio.h>
+#include <stdio_ext.h>
 #include <stdlib.h>
 #include <string.h>
 #include "includes/connection.h"
@@ -10,6 +11,12 @@
 #include "includes/list.h"
 #include "includes/readFile.h"
 #include "includes/menu.h"
+#include "includes/classmenu.h"
+#include "includes/pxcmenu.h"
+#include "includes/coursemenu.h"
+#include "includes/teachermenu.h"
+#include "includes/reservation.h"
+#include "includes/operativemenu.h"
 int main()
 {
 	int loop = 1;
@@ -26,7 +33,6 @@ int main()
 		case '1':
 			OptOpeMenu();
 			break;
-
 		case '2':
 			printf("opcion 2\n");
 			break;

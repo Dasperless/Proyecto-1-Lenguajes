@@ -32,7 +32,7 @@ void addClassroomFromFile(char *line, list **head)
 	{
 		char values[512];
 		snprintf(values, sizeof(values), "'%s', %d", name, capacity);
-		callStoredProcedure("SP_InsertarAula", values);
+		callStoredProcedure("SP_InsertClassroom", values);
 		push(head, newClassroom, size);
 	}
 }
