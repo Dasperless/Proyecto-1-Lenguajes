@@ -1,5 +1,5 @@
 #ifndef CLASSMENU_H
-#define CLASSMEU_H
+#define CLASSMENU_H
 
 void addClassroomMenu();
 void delClassroomMenu();

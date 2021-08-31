@@ -63,39 +63,6 @@ void finish_with_error(MYSQL *con)
 }
 
 /**
- * @brief Inserta en la base de datos
- * 
- * @param table La tabla a la cual insertar
- * @param columns  Las columnas a las cuales insertar ej(nombre,capacidad)
- * @param values  Los valores ej ("string",entero)
- */
-int insertOnDatabase(char *table, char *columns, char *values)
-{
-  char query[512] = {0};
-  snprintf(query, 512, "INSERT INTO %s %s VALUES%s", table, columns, values);
-  printf("%s\n", query);
-
-  MYSQL *con = mysql_init(NULL);
-  if (con == NULL)
-  {
-    fprintf(stderr, "%s\n", mysql_error(con));
-    return 1;
-  }
-  if (mysql_real_connect(con, server, user, password,
-                         database, 0, NULL, 0) == NULL)
-  {
-    finish_with_error(con);
-  }
-  if (mysql_query(con, query))
-  {
-    finish_with_error(con);
-  }
-  mysql_close(con);
-  printf("Se insertado en la base de datos con exito\n");
-  return 0;
-}
-
-/**
  * @brief Imprime los datos de una tabla de la base de datos
  * 
  * @param sp La tabla a imprimir.
@@ -197,6 +164,60 @@ void printStoredProcedure(char *sp)
   mysql_free_result(result);
   mysql_close(con);
 }
+
+/**
+ * @brief Imprime el stored procedure
+ * 
+ * @param sp El procedimiento
+ */
+int printStoredProcedureOutput(char *sp, char*values)
+{
+  char query[512] = {0};
+  char output[10] = {0};
+  snprintf(query, 512, "CALL %s (%s,@output)", sp,values);
+  printf("%s\n",query);
+  MYSQL *con = mysql_init(NULL);
+
+  if (con == NULL)
+  {
+    fprintf(stderr, "mysql_init() failed\n");
+  }
+
+  if (mysql_real_connect(con, server, user, password,database, 0, NULL, 0) == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  if (mysql_query(con, query))
+  {
+    finish_with_error(con);
+  }
+
+  MYSQL_RES *result = mysql_store_result(con);
+
+  if (result == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  int num_fields = mysql_num_fields(result);
+
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result)))
+  {
+    for (int i = 0; i < num_fields; i++)
+    {
+      printf("%s\t\t", row[i] ? row[i] : "NULL");
+    }
+
+    printf("\n");
+  }
+
+  mysql_free_result(result);
+  mysql_close(con);
+  return atoi(output);
+}
+
 
 /**
  * @brief Llama un procedimiento almacenado mediante mysql_query.

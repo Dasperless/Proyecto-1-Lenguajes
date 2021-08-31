@@ -1,0 +1,1263 @@
+#include <mysql.h>
+#include <stdio.h>
+#include <stdio_ext.h>
+#include <stdlib.h>
+#include <string.h>
+#include "includes/connection.h"
+#include "includes/structs/classroom.h"
+#include "includes/structs/teacher.h"
+#include "includes/structs/course.h"
+#include "includes/structs/period.h"
+#include "includes/readFile.h"
+#include "includes/menu.h"
+#include "includes/classmenu.h"
+#include "includes/pxcmenu.h"
+#include "includes/coursemenu.h"
+#include "includes/teachermenu.h"
+#include "includes/reservation.h"
+#include "includes/statisticsMenu.h"
+#include "includes/operativemenu.h"
+#include "includes/genoptmenu.h"
+
+int main()
+{
+	int loop = 1;
+	do
+	{
+		printHeader("Menu");
+		printf("1.) Opciones operativas\n");
+		printf("2.) Opciones generales\n");
+		printf("3.) Salir\n");
+
+		char option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			OptOpeMenu();
+			break;
+		case '2':
+			genOptMenu();
+			break;
+		case '3':
+			loop = 0;
+			break;
+		default:
+			printf("La opcion ingresada no existe\n");
+			break;
+		}
+
+	} while (loop);
+}
+
+#ifndef CLASSROOM_H
+#define CLASSROOM_H
+typedef struct Classroom
+{
+	char name[100];
+	int capacity;
+} classroom;
+#endif
+
+#ifndef COURSE_H
+#define COURSE_H
+typedef struct Course
+{
+	char careerId[100];
+	char courseId[100];
+	char name[100];
+} course;
+#endif
+
+#ifndef PERIOD_H
+#define PERIOD_H
+typedef struct Period
+{
+	char courseCode[100];
+	char year[100];
+	int perid;
+	char group[100];
+	char teacherName[100];
+	int numStudents;
+}period;
+#endif
+
+#ifndef TEACHER_H
+#define TEACHER_H
+typedef struct Teacher
+{
+	char name[100];
+	int idCard;
+}teacher;
+#endif
+
+#ifndef CLASSMENU_H
+#define CLASSMENU_H
+
+void addClassroomMenu();
+void delClassroomMenu();
+void InfoClassroomMenu();
+
+/**
+ * @brief Menu de informacion de aulas
+ * 
+ */
+void InfoClassroomMenu()
+{
+	char path[1024] = {0};
+	int loop = 1;
+	do
+	{
+		printHeader("Informacion de aulas");
+		printf("1.) Incluir en lote\n");
+		printMaintMenu("aula",1);
+
+		char option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			printf("Ingrese el la ruta del archivo .txt\n");
+			printf("\n>>");
+			scanf(" %1023[^\n]%*[^\n]", path);
+			readClassroomFromFile(path);
+			break;
+		case '2':
+			addClassroomMenu();
+			break;	
+		case '3':
+			printFormatedTable("classroom");
+			break;	
+		case '4':
+			delClassroomMenu();
+			break;	
+		case '5':
+			loop = 0;
+			break;
+		default:
+			printf("La opcion ingresada no existe\n");
+			break;
+		}
+
+	} while (loop);
+}
+
+/**
+ * @brief Menu para eliminar aulas.
+ * 
+ */
+void delClassroomMenu(){
+	printFormatedTable("classroom");
+	printf("\nIngrese el indice a borrar");
+	int id = inputInt();
+
+	char values[120];
+	snprintf(values, sizeof(values), "%d",id);
+	if(callStoredProcedureOutput("SP_DeleteClassroomById",values)<0) 
+		printf("No existe el id ");	
+}
+
+/**
+ * @brief Menu para agregar aulas.
+ * 
+ */
+void addClassroomMenu(){
+	classroom newClassroom;
+
+	printf("\nIngrese el nombre del aula");
+	printf("\n>>");
+	scanf(" %99[^\n]%*[^\n]", newClassroom.name);
+
+	printf("\nIngrese la capacidad");
+	printf("\n>>");
+	scanf("%d", &newClassroom.capacity);
+
+	char values[120];
+	snprintf(values, sizeof(values), "'%s', %d",newClassroom.name,newClassroom.capacity);
+	callStoredProcedure("SP_InsertClassroom",values);	
+}
+
+#endif 
+
+MYSQL *mysql;
+char *server = "localhost";
+char *user = "root";
+char *password = "Proyecto_1_Lenguajes"; /* set me first */
+char *database = "proyecto-1";
+
+void finish_with_error(MYSQL *con);
+void callStoredProcedure(char *sp, char *values);
+int callStoredProcedureOutput(char *sp, char *values);
+
+void printStoredProcedure(char *sp);
+void printTable(char *table);
+void printFormatedTable(char table[]);
+/**
+ * @brief Imprime con encabezado las tablas
+ * 
+ * @param table la tabla a imprimir
+ */
+void printFormatedTable(char table[])
+{
+
+  if (strcmp(table, "teacher") == 0)
+  {
+    printf("Id\t\tCedula\t\t\tNombre\n");
+  }
+  else if (strcmp(table, "classroom") == 0)
+  {
+    printf("Id\t\tNombre\t\tCapacidad\n");
+  }
+  else if (strcmp(table, "course") == 0)
+  {
+    printf("Id\t\tCod.carrera\tCod.curso\t\tnombre\n");
+  }
+  else if (strcmp(table, "periodxcourse") == 0)
+  {
+    printf("Id\t\tCod.curso\tanio\t\tperiodo\t\tgrupo\t\tprofesor\t\tcant.estudiantes\n");
+    printStoredProcedure("SP_PrintPeriodxCourse");
+    return;
+  }
+  else if (strcmp(table, "reservation") == 0)
+  {
+    printf("Id\t\tfecha\t\t\thora inicio\t\thora fin\t\taula\t\tanio\t\tperiodo\t\tcod.curso\tgrupo\n");
+    printStoredProcedure("SP_PrintReservation");
+    return;
+  }
+  else
+  {
+    printf("No existe la tabla\n");
+    return;
+  }
+  printTable(table);
+}
+
+/**
+ * @brief Imprime errores de una consulta
+ * 
+ * @param con la conexión 
+ */
+void finish_with_error(MYSQL *con)
+{
+  fprintf(stderr, "%s\n", mysql_error(con));
+  mysql_close(con);
+}
+
+/**
+ * @brief Imprime los datos de una tabla de la base de datos
+ * 
+ * @param sp La tabla a imprimir.
+ */
+void printTable(char *table)
+{
+  char query[512] = {0};
+  snprintf(query, 512, "SELECT * FROM %s", table);
+  MYSQL *con = mysql_init(NULL);
+
+  if (con == NULL)
+  {
+    fprintf(stderr, "mysql_init() failed\n");
+  }
+
+  if (mysql_real_connect(con, server, user, password,
+                         database, 0, NULL, 0) == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  if (mysql_query(con, query))
+  {
+    finish_with_error(con);
+  }
+
+  MYSQL_RES *result = mysql_store_result(con);
+
+  if (result == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  int num_fields = mysql_num_fields(result);
+
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result)))
+  {
+    for (int i = 0; i < num_fields; i++)
+    {
+      printf("%s\t\t", row[i] ? row[i] : "NULL");
+    }
+
+    printf("\n");
+  }
+
+  mysql_free_result(result);
+  mysql_close(con);
+}
+
+/**
+ * @brief Imprime el stored procedure
+ * 
+ * @param sp El procedimiento
+ */
+void printStoredProcedure(char *sp)
+{
+  char query[512] = {0};
+  snprintf(query, 512, "CALL %s", sp);
+  printf("%s\n",query);
+  MYSQL *con = mysql_init(NULL);
+
+  if (con == NULL)
+  {
+    fprintf(stderr, "mysql_init() failed\n");
+  }
+
+  if (mysql_real_connect(con, server, user, password,
+                         database, 0, NULL, 0) == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  if (mysql_query(con, query))
+  {
+    finish_with_error(con);
+  }
+
+  MYSQL_RES *result = mysql_store_result(con);
+
+  if (result == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  int num_fields = mysql_num_fields(result);
+
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result)))
+  {
+    for (int i = 0; i < num_fields; i++)
+    {
+      printf("%s\t\t", row[i] ? row[i] : "NULL");
+    }
+
+    printf("\n");
+  }
+
+  mysql_free_result(result);
+  mysql_close(con);
+}
+
+/**
+ * @brief Imprime el stored procedure
+ * 
+ * @param sp El procedimiento
+ */
+int printStoredProcedureOutput(char *sp, char*values)
+{
+  char query[512] = {0};
+  char output[10] = {0};
+  snprintf(query, 512, "CALL %s (%s,@output)", sp,values);
+  printf("%s\n",query);
+  MYSQL *con = mysql_init(NULL);
+
+  if (con == NULL)
+  {
+    fprintf(stderr, "mysql_init() failed\n");
+  }
+
+  if (mysql_real_connect(con, server, user, password,database, 0, NULL, 0) == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  if (mysql_query(con, query))
+  {
+    finish_with_error(con);
+  }
+
+  MYSQL_RES *result = mysql_store_result(con);
+
+  if (result == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  int num_fields = mysql_num_fields(result);
+
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result)))
+  {
+    for (int i = 0; i < num_fields; i++)
+    {
+      printf("%s\t\t", row[i] ? row[i] : "NULL");
+    }
+
+    printf("\n");
+  }
+
+  mysql_free_result(result);
+  mysql_close(con);
+  return atoi(output);
+}
+
+
+/**
+ * @brief Llama un procedimiento almacenado mediante mysql_query.
+ * 
+ * @param sp      
+ * @param values 
+ */
+void callStoredProcedure(char *sp, char *values)
+{
+  char query[512] = {0};
+  snprintf(query, 512, "CALL %s (%s)", sp, values);
+  printf("%s\n", query);
+
+  MYSQL *con = mysql_init(NULL);
+  if (con == NULL)
+  {
+    fprintf(stderr, "%s\n", mysql_error(con));
+  }
+  if (mysql_real_connect(con, server, user, password,
+                         database, 0, NULL, 0) == NULL)
+  {
+    finish_with_error(con);
+  }
+  if (mysql_query(con, query))
+  {
+    finish_with_error(con);
+  }
+  mysql_close(con);
+}
+
+/**
+ * @brief LLama un procedimiento almacenado con un solo output.
+ * 
+ * @param sp      el procedimiento almacenado.
+ * @param values  los valores del procedimiento.
+ * @return int    el output del procedimiento.
+ */
+int callStoredProcedureOutput(char *sp, char *values)
+{
+  char query[512] = {0};
+  char output[4] = {0};
+  snprintf(query, 512, "CALL %s (%s,@output)", sp, values);
+  printf("%s\n", query);
+  MYSQL *con = mysql_init(NULL);
+  if (con == NULL)
+  {
+    fprintf(stderr, "%s\n", mysql_error(con));
+  }
+  if (mysql_real_connect(con, server, user, password,
+                         database, 0, NULL, 0) == NULL)
+  {
+    finish_with_error(con);
+  }
+  
+  if (mysql_query(con, query))
+  {
+    finish_with_error(con);
+  }
+
+  if (mysql_query(con, "SELECT @output"))
+  {
+    finish_with_error(con);
+  }
+
+  MYSQL_RES *result = mysql_store_result(con);
+
+  if (result == NULL)
+  {
+    finish_with_error(con);
+  }
+
+  int num_fields = mysql_num_fields(result);
+
+  MYSQL_ROW row;
+  while ((row = mysql_fetch_row(result)))
+  {
+    for (int i = 0; i < num_fields; i++)
+    {
+      snprintf(output, 4, "%s", row[i]);
+    }
+  }
+
+  mysql_free_result(result);
+  mysql_close(con);
+  return atoi(output);
+}
+
+#ifndef COURSEMENU_H
+#define COURSEMENU_H
+
+void delCourseMenu();
+void addCourseMenu();
+void InfoCourseMenu();
+
+/**
+ * @brief Menu de informacion de cursos
+ * 
+ */
+void InfoCourseMenu()
+{
+	int loop = 1;
+	do
+	{
+		printHeader("Informacion de cursos");
+		printMaintMenu("cursos", 0);
+
+		char option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			addCourseMenu();
+			break;
+		case '2':
+			printFormatedTable("course");
+			break;
+		case '3':
+			delCourseMenu();
+			break;
+		case '4':
+			loop = 0;
+			break;
+		default:
+			printf("La opcion ingresada no existe\n");
+			break;
+		}
+
+	} while (loop);
+}
+
+/**
+ * @brief Menu para eliminar cursos.
+ * 
+ */
+void delCourseMenu()
+{
+	printFormatedTable("course");
+	printf("\nIngrese el indice a borrar");
+	int id = inputInt();
+
+	char values[128];
+	snprintf(values, sizeof(values), "%d", id);
+	if (callStoredProcedureOutput("SP_DeleteCourseById", values) < 0)
+		printf("No existe el indice ingresado");
+}
+
+/**
+ * @brief Menu para agregar cursos
+ * 
+ */
+void addCourseMenu()
+{
+	course newCourse;
+
+	printf("Ingrese el codigo de la carrera\n"); //Obtiene el codigo de la carrera.
+	printf("\n>>");
+	scanf(" %99[^\n]%*[^\n]", newCourse.careerId);
+
+	printf("Ingrese el codigo de curso\n"); //Obtiene el codigo de curso.
+	printf("\n>>");
+	scanf(" %99[^\n]%*[^\n]", newCourse.courseId);
+
+	printf("Ingrese el nombre del curso\n"); //Obtiene el nombre del curso
+	printf("\n>>");
+	scanf(" %99[^\n]%*[^\n]", newCourse.name);
+
+	char values[512];
+	snprintf(values, sizeof(values), "'%s', '%s', '%s'", newCourse.careerId, newCourse.courseId, newCourse.name);
+	callStoredProcedure("SP_InsertCourse", values);
+}
+#endif
+
+#if !defined(GENOPTMENU_H)
+#define GENOPTMENU_H
+
+void queryByDay();
+void queryByClassroom();
+void queryByCourse();
+
+/**
+ * @brief Menu de opciones generales.
+ * 
+ */
+void genOptMenu()
+{
+	int loop = 1;
+	char option;
+	do
+	{
+		printHeader("Opciones generales");
+		printf("1.) Consulta por dia\n");
+		printf("2.) Consulta por aula\n");
+		printf("3.) Consulta por curso\n");
+		printf("4.) Volver\n");
+
+		option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			queryByDay();
+			break;
+		case '2':
+			queryByClassroom();
+			break;
+		case '3':
+			queryByCourse();
+			break;
+		case '4':
+			loop = 0;
+			break;
+		default:
+			printf("No existe la opcion ingresada\n");
+			break;
+		}
+	} while (loop);
+}
+
+/**
+ * @brief Obtiene la fecha y realiza la consulta
+ * 
+ */
+void queryByDay()
+{
+	char dateBuff[120] = {0};
+	int day, month, year;
+
+	__fpurge(stdin);
+	printf("\nIngrese la fecha \"dd/mm/aaaa\": ");
+	fgets(dateBuff, 119, stdin);
+	sscanf(dateBuff, "%d/%d/%d", &day, &month, &year);
+
+	char query[250];
+	snprintf(query, sizeof(query), "SP_QueryByDay('%s')", dateBuff);
+
+	printStoredProcedure(query);
+}
+
+/**
+ * @brief Obtien el nombre del aula y realiza la consulta
+ * 
+ */
+void queryByClassroom()
+{
+	char classroomName[100];
+	printf("\nIngrese el aula: ");
+	scanf(" %99[^\n]%*[^\n]", classroomName);
+
+	char values[120];
+	snprintf(values, sizeof(values), "'%s'", classroomName);
+
+	if (printStoredProcedureOutput("SP_QueryByClassroom", values) < 0)
+		printf("No existe el aula");
+}
+
+/**
+ * @brief Obtiene el nombre del curso y hace la consulta 
+ * 
+ */
+void queryByCourse()
+{
+	period queryCourse;
+	printf("\nIngrese el anio: ");
+	scanf(" %99[^\n]%*[^\n]", queryCourse.year);
+
+	printf("\nIngrese el periodo: ");
+	scanf("%d", &queryCourse.perid);
+
+	printf("\nIngrese el curso: ");
+	scanf(" %99[^\n]%*[^\n]", queryCourse.courseCode);
+
+	printf("\nIngrese el grupo: ");
+	scanf(" %99[^\n]%*[^\n]", queryCourse.group);
+
+	char values[512];
+	snprintf(values, sizeof(values), "'%s', %d, '%s','%s'", queryCourse.year, queryCourse.perid, queryCourse.courseCode, queryCourse.group);
+
+	if (printStoredProcedureOutput("SP_QueryByCourse", values) < 0)
+		printf("No existe el aula");
+}
+
+#endif // GENOPTMENU_H
+
+#ifndef MENU_H
+#define MENU_H
+
+char *inputString();
+char inputMenu();
+int inputInt();
+
+void printMaintMenu(char* functTitle, int startNum);
+void printHeader(char *title);
+
+
+
+/**
+ * @brief Obtiene el input para los menus
+ * 
+ * @return char 
+ */
+char inputMenu()
+{
+	char option;
+	printf("\n>>");
+	scanf(" %c", &option);
+	return option;
+}
+
+/**
+ * @brief Obtine un inpunt entero
+ * 
+ * @return int 
+ */
+int inputInt(){
+	int option;
+	printf("\n>>");
+	scanf(" %i", &option);
+	return option;
+}
+
+/**
+ * @brief Imprime un una caja con un encabezado
+ * 
+ * @param title El titulo del encabezado.
+ */
+void printHeader(char *title)
+{
+	int size = strlen(title) + 24;
+	printf("\n+");
+	for (int i = 0; i < size; i++)
+		printf("-");
+	printf("+\n");
+
+	printf("|            %s            |\n+", title);
+	for (int i = 0; i < size; i++)
+		printf("-");
+	printf("+\n");
+}
+
+/**
+ * @brief Imprime el menu de mantenimiento
+ * 
+ * @param functTitle 	El nombre de la opcion operativa
+ * @param startNum 		El numero con el que inicia el menu
+ */
+void printMaintMenu(char* functTitle, int startNum){
+	printf("%d.) Incluir %s\n",startNum+1,functTitle);
+	printf("%d.) Listar %s\n",startNum+2,functTitle);
+	printf("%d.) Eliminar %s\n",startNum+3,functTitle);
+	printf("%d.) Volver\n",startNum+4);
+}
+#endif
+
+#ifndef OPERATIVEMENU_H
+#define OPERATIVEMENU_H
+/**
+ * @brief Menu de opciones operativas
+ * 
+ */
+void OptOpeMenu()
+{
+	int loop = 1;
+	do
+	{
+		printHeader("Opciones operativas");
+		printf("1.) Información Aulas\n");
+		printf("2.) Información de Profesores\n");
+		printf("3.) Información de Cursos\n");
+		printf("4.) Cursos por Período\n");
+		printf("5.) Reservación de aula\n");
+		printf("6.) Cancelar reservación\n");
+		printf("7.) Estadísticas\n");
+		printf("8.) Volver\n");
+
+		char option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			InfoClassroomMenu();
+			break;
+		case '2':
+			InfoTeacherMenu();
+			break;
+		case '3':
+			InfoCourseMenu();
+			break;
+		case '4':
+			InfoPeriodMenu();
+			break;
+		case '5':
+			ReserveClassroomMenu();
+			break;
+		case '6':
+			cancelReservationMenu();
+			break;
+		case '7':
+			statisticsMenu();
+			break;
+		case '8':
+			loop = 0;
+			break;
+		default:
+			printf("La opcion ingresada no existe\n");
+			break;
+		}
+	} while (loop);
+}
+#endif
+
+#ifndef PXCMENU_H
+#define PXCMENU_H
+
+void delPeriodMenu();
+void addPeriodMenu();
+void InfoPeriodMenu();
+
+/**
+ * @brief Menu de informacion de cursos
+ * 
+ */
+void InfoPeriodMenu()
+{
+	int loop = 1;
+	do
+	{
+		printHeader("Informacion de curso por periodo");
+		printMaintMenu("curso por periodo", 0);
+
+		char option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			addPeriodMenu();
+			break;
+		case '2':
+			printFormatedTable("periodxcourse");
+			break;
+		case '3':
+			delPeriodMenu();
+			break;
+		case '4':
+			loop = 0;
+			break;
+		default:
+			printf("La opcion ingresada no existe\n");
+			break;
+		}
+
+	} while (loop);
+}
+
+/**
+ * @brief Menu para eliminar cursos.
+ * 
+ */
+void delPeriodMenu()
+{
+	printFormatedTable("periodxcourse");
+	printf("\nIngrese el indice a borrar");
+	int id = inputInt();
+
+	char values[16];
+	snprintf(values, sizeof(values), "%d", id);
+
+	if (callStoredProcedureOutput("SP_DeleteCourseByPeriod", values) < 0)
+		printf("No existe el id del curso en este periodo");
+}
+
+/**
+ * @brief Menu para agregar cursos
+ * 
+ */
+void addPeriodMenu()
+{
+	period newPeriod;
+
+	printFormatedTable("course");
+	printf("Ingrese el codigo del curso\n"); //Obtiene el codigo del curso
+	printf("\n>>");
+	scanf("%s", newPeriod.courseCode);
+
+	printf("Ingrese el anio\n"); //Ingresa el anio
+	printf("\n>>");
+	scanf("%s", newPeriod.year);
+
+	printf("Ingrese el periodo\n"); //Ingresa el periodo
+	printf("\n>>");
+	scanf("%d", &newPeriod.perid);
+
+	printf("Ingrese el group\n"); //Ingresa el grupo.
+	printf("\n>>");
+	scanf(" %99[^\n]%*[^\n]", newPeriod.group);
+
+	printFormatedTable("teacher");
+	printf("Ingrese el nombre del profesor\n");
+	printf("\n>>");
+	scanf(" %99[^\n]%*[^\n]", newPeriod.teacherName);
+
+	printf("Ingrese el numero de estudiantes\n");
+	printf("\n>>");
+	scanf("%d", &newPeriod.numStudents);
+
+	char values[512];
+	snprintf(values, sizeof(values), "'%s', '%s', %d, '%s', '%s', %d", newPeriod.courseCode, newPeriod.year, newPeriod.perid, newPeriod.group, newPeriod.teacherName, newPeriod.numStudents);
+	int result = callStoredProcedureOutput("SP_InsertCourseByPeriod", values);
+	if (result == -1)
+	{
+		printf("ya existe un curso con el mismo anio o grupo en este periodo");
+	}
+	else if (result == -2)
+	{
+		printf("existe un curso con el mismo codigo de curso.");
+	}
+	else
+	{
+		printf("Se inserto con exito");
+	}
+}
+
+#endif
+
+
+#ifndef READFILE_H
+#define READFILE_H
+
+/**
+ * @brief Agrega a aula con los datos de una linea del txt
+ * 
+ * @param line la linea a leer.
+ */
+void addClassroomFromFile(char *line)
+{
+	classroom newClassroom;
+	for (int i = 0; i < 2; i++)
+	{
+		switch (i)
+		{
+		case 0: //Obtiene el nombre
+			strcpy(newClassroom.name, strtok(line, ","));
+			break;
+
+		case 1: //Obtiene la capacidad
+			newClassroom.capacity = atoi(strtok(NULL, " "));
+			break;
+		}
+	}
+	if (newClassroom.name != NULL && newClassroom.capacity != 0)
+	{
+		char values[512];
+		snprintf(values, sizeof(values), "'%s', %d", newClassroom.name, newClassroom.capacity);
+		callStoredProcedure("SP_InsertClassroom", values);
+	}
+}
+
+/**
+ * @brief Lee las lineas del archivo txt.
+ * 
+ * @param fileName  Ruta del archivo
+ * @param head 		Puntero al inicio de la lista.
+ */
+void readClassroomFromFile(char *fileName)
+{
+	FILE *file = fopen(fileName, "r");
+	char line[256];
+	while (fgets(line, sizeof(line), file))
+	{
+		addClassroomFromFile(line);
+	}
+	fclose(file);
+}
+
+#endif
+
+#if !defined(RESERVATION_H)
+#define RESERVATION_H
+
+/**
+ * @brief Valida el la hora ingresada
+ * 
+ * @param hh las horas
+ * @param mm los minutos
+ * @return int 1 si falla, 0 si esta correcto el tiempo.
+ */
+int ValidateTime(int hh, int mm)
+{
+	int ret = 0;
+
+	if (hh > 24 || hh < 0)
+		ret = 1;
+	if (mm > 60 || mm < 0)
+		ret = 1;
+
+	return ret;
+}
+
+/**
+ * @brief Menu para verificar si realiza una nueva reservacion
+ * 
+ */
+int askNewReservation()
+{
+	printf("1.) Ingresar una nueva reservación\n");
+	printf("2.) volver\n");
+	char option;
+	int ret;
+	int incorrect = 0;
+	do
+	{
+		incorrect = 0;
+		option = inputMenu();
+
+		switch (option)
+		{
+		case '1':
+			ret = 1;
+			break;
+		case '2':
+			ret = 0;
+			break;
+		default:
+			incorrect = 1;
+			break;
+		}
+	} while (incorrect);
+	return ret;
+}
+
+/**
+ * @brief Menu de reservacion de aulas
+ * 
+ */
+void ReserveClassroomMenu()
+{
+	char startTimeBuff[100] = {0};
+	char endTimeBuff[100] = {0};
+	char dateBuff[100] = {0};
+	char classroomName[100] = {0};
+	char yearChar[10] = {0};
+	char period[3] = {0};
+	char courseCode[100] = {0};
+	char group[100] = {0};
+
+	int ret, hour, min;
+	int day, month, year;
+
+	int loop = 1;
+
+	do
+	{
+		__fpurge(stdin);
+		printf("\nIngrese la fecha \"dd/mm/aaaa\": ");
+		fgets(dateBuff, 100, stdin);
+		sscanf(dateBuff, "%d/%d/%d", &day, &month, &year);
+
+		do
+		{
+			printf("\nIngrese la hora de inicio \"hh:mm\": ");
+			fgets(startTimeBuff, 99, stdin);
+			sscanf(startTimeBuff, "%d:%d", &hour, &min);
+			ret = ValidateTime(hour, min);
+			if (ret)
+			{
+				printf("\nFormato del tiempo inválido.\n");
+			}
+		} while (ret);
+
+		do
+		{
+			printf("\nIngrese la hora fin \"hh:mm\": ");
+			fgets(endTimeBuff, 99, stdin);
+			sscanf(endTimeBuff, "%d:%d", &hour, &min);
+			ret = ValidateTime(hour, min);
+			if (ret)
+			{
+				printf("\nFormato del tiempo inválido.\n");
+			}
+		} while (ret);
+
+		__fpurge(stdin);
+		printFormatedTable("classroom");
+		printf("\nIngrese el nombre del aula: ");
+		scanf(" %99[^\n]%*[^\n]", classroomName);
+
+		__fpurge(stdin);
+		printf("\nIngrese el anio: ");
+		scanf(" %99[^\n]%*[^\n]", yearChar);
+
+
+		__fpurge(stdin);
+		printf("\nIngrese el periodo: ");
+		scanf(" %2[^\n]%*[^\n]", period);
+		
+
+		printFormatedTable("course");
+		printf("\nIngrese el codigo del curso: ");
+		scanf(" %99[^\n]%*[^\n]", courseCode);
+
+
+		printf("\nIngrese el grupo: ");
+		scanf(" %99[^\n]%*[^\n]", group);
+
+
+		char values[1024];
+		snprintf(values, sizeof(values), "'%s', '%s', '%s', '%s', %s, '%s', '%s', '%s'", dateBuff, startTimeBuff, endTimeBuff, classroomName, yearChar, period, courseCode, group);
+		int output = callStoredProcedureOutput("SP_NewReservation", values);
+		switch (output)
+		{
+		case -1:
+			printf("No existe al aula.\n");
+
+			break;
+		case -2:
+			printf("No existe el curso en el periodo.\n");
+
+			break;
+		case -3:
+			printf("No hay suficiente espacio.\n");
+
+			break;
+		case -4:
+			printf("Ya existe una reservacion.\n");
+
+			break;
+		default:
+			printf("Su numero de reservacion es: %d\n", output);
+
+			break;
+		}
+		loop = askNewReservation();
+	} while (loop);
+}
+
+/**
+ * @brief Menu para cancelar la reservacion
+ * 
+ */
+void cancelReservationMenu(){
+	printFormatedTable("reservation");
+	printf("\nIngrese el indice a borrar");
+	int id = inputInt();
+
+	char values[120];
+	snprintf(values, sizeof(values), "%d",id);
+	if(callStoredProcedureOutput("SP_DeleteReservationById",values)<0) 
+		printf("No existe el id\n");
+	else 
+		printf("Se elimino con exito\n");
+
+}
+
+
+#endif // RESERVATION_H
+
+
+#if !defined(STATISTICSMENU_H)
+#define STATISTICSMENU_H
+
+void statisticsMenu()
+{
+	int loop = 1;
+
+	char option;
+	do
+	{
+		printHeader("Estadisticas");
+		printf("1.) Top 3 aulas mas reservadas\n");
+		printf("2.) Top 3 profesores con mas reservas\n");
+		printf("3.) Cantidad de reservas por anio-mes\n");
+		printf("4.) Salir\n");
+		option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			printStoredProcedure("SP_Statistics('A')");
+			break;
+		case '2':
+			printStoredProcedure("SP_Statistics('B')");
+			break;
+		case '3':
+			printStoredProcedure("SP_Statistics('C')");
+			break;
+		case '4':
+			loop = 0;
+			break;
+		default:
+			break;
+		}
+	} while (loop);
+}
+
+#endif // STATISTICSMENU_H
+
+#ifndef TEACHERMENU_H
+#define TEACHERMENU_H
+
+void delTeacherMenu();
+void addTeacherMenu();
+void InfoTeacherMenu();
+
+/**
+ * 
+ * @brief Menu de informacion de profesores
+ * 
+ */
+void InfoTeacherMenu()
+{
+	int loop = 1;
+	do
+	{
+		printHeader("Informacion de profesores");
+		printMaintMenu("profesor", 0);
+
+		char option = inputMenu();
+		switch (option)
+		{
+		case '1':
+			addTeacherMenu();
+			break;
+		case '2':
+			printFormatedTable("teacher");
+			break;
+		case '3':
+			delTeacherMenu();
+			break;
+		case '4':
+			loop = 0;
+			break;
+		default:
+			printf("La opcion ingresada no existe\n");
+			break;
+		}
+
+	} while (loop);
+}
+
+/**
+ * @brief Menu para eliminar profesores.
+ * 
+ */
+void delTeacherMenu()
+{
+	callStoredProcedure("SP_DeleteTeachers", " ");
+	printf("Se han borrado todos los profesores\n");
+}
+
+/**
+ * @brief Menu que agrega un nuevo profesor
+ * 
+ */
+void addTeacherMenu()
+{
+	teacher newTeacher;
+
+	printf("Ingrese el nombre del profesor\n"); //Obtiene el nombre.
+	printf("\n>>");
+	scanf(" %99[^\n]%*[^\n]", newTeacher.name);
+
+	printf("Ingrese la cedula del profesor\n"); //Obtiene el profesor.
+	printf("\n>>");
+	scanf("%d", &newTeacher.idCard);
+
+	char values[512];
+	snprintf(values, sizeof(values), "'%s', %d", newTeacher.name, newTeacher.idCard);
+	callStoredProcedure("SP_InsertTeacher", values);
+}
+#endif

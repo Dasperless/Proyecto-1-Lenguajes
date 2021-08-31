@@ -9,6 +9,8 @@
 		"teacher.h": "c",
 		"coursemenu.h": "c",
 		"teachermenu.h": "c",
-		"menu.h": "c"
+		"menu.h": "c",
+		"classmenu.h": "c",
+		"connection.h": "c"
 	}
 }

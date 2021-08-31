@@ -36,7 +36,7 @@ int main()
 			OptOpeMenu();
 			break;
 		case '2':
-			printf("opcion 2\n");
+			genOptMenu();
 			break;
 		case '3':
 			loop = 0;

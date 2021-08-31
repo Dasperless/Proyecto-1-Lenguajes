@@ -1,5 +1,5 @@
-#ifndef TEACHERS_H
-#define TEACHERS_H
+#ifndef TEACHER_H
+#define TEACHER_H
 typedef struct Teacher
 {
 	char name[100];
