@@ -10,12 +10,13 @@ void InfoTeacherMenu();
  * @brief Menu de informacion de profesores
  * 
  */
-void InfoTeacherMenu(){
+void InfoTeacherMenu()
+{
 	int loop = 1;
 	do
 	{
 		printHeader("Informacion de profesores");
-		printMaintMenu("profesor",0);
+		printMaintMenu("profesor", 0);
 
 		char option = inputMenu();
 		switch (option)
@@ -25,10 +26,10 @@ void InfoTeacherMenu(){
 			break;
 		case '2':
 			printFormatedTable("teacher");
-			break;	
+			break;
 		case '3':
 			delTeacherMenu();
-			break;	
+			break;
 		case '4':
 			loop = 0;
 			break;
@@ -44,8 +45,9 @@ void InfoTeacherMenu(){
  * @brief Menu para eliminar profesores.
  * 
  */
-void delTeacherMenu(){
-	callStoredProcedure("SP_DeleteTeachers"," ");
+void delTeacherMenu()
+{
+	callStoredProcedure("SP_DeleteTeachers", " ");
 	printf("Se han borrado todos los profesores\n");
 }
 
@@ -53,20 +55,22 @@ void delTeacherMenu(){
  * @brief Menu que agrega un nuevo profesor
  * 
  */
-void addTeacherMenu(){
+void addTeacherMenu()
+{
+	teacher newTeacher;
 	char name[100] = {0};
 	int id;
-	
-	printf("Ingrese el nombre del profesor\n");	//Obtiene el nombre.
+
+	printf("Ingrese el nombre del profesor\n"); //Obtiene el nombre.
 	printf("\n>>");
-	scanf(" %99[^\n]%*[^\n]", name);
+	scanf(" %99[^\n]%*[^\n]", newTeacher.name);
 
 	printf("Ingrese la cedula del profesor\n"); //Obtiene el profesor.
 	printf("\n>>");
-	scanf("%d", &id);
+	scanf("%d", &newTeacher.idCard);
 
 	char values[512];
-	snprintf(values, sizeof(values), "'%s', %d",name,id);
-	callStoredProcedure("SP_InsertTeacher",values);
+	snprintf(values, sizeof(values), "'%s', %d", newTeacher.name, newTeacher.idCard);
+	callStoredProcedure("SP_InsertTeacher", values);
 }
 #endif

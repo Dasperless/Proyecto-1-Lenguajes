@@ -68,19 +68,18 @@ void delClassroomMenu(){
  * 
  */
 void addClassroomMenu(){
-	char name[100] ={0};
-	int capacity;
+	classroom newClassroom;
 
 	printf("\nIngrese el nombre del aula");
 	printf("\n>>");
-	scanf(" %99[^\n]%*[^\n]", name);
+	scanf(" %99[^\n]%*[^\n]", newClassroom.name);
 
 	printf("\nIngrese la capacidad");
 	printf("\n>>");
-	scanf("%d", &capacity);
+	scanf("%d", &newClassroom.capacity);
 
 	char values[120];
-	snprintf(values, sizeof(values), "'%s', %d",name,capacity);
+	snprintf(values, sizeof(values), "'%s', %d",newClassroom.name,newClassroom.capacity);
 	callStoredProcedure("SP_InsertClassroom",values);	
 }
 

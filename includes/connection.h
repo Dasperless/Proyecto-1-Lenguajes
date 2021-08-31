@@ -29,7 +29,7 @@ void printFormatedTable(char table[])
   }
   else if (strcmp(table, "course") == 0)
   {
-    printf("Id\t\tCod.carrera\t\tCod.curso\t\tnombre\n");
+    printf("Id\t\tCod.carrera\tCod.curso\t\tnombre\n");
   }
   else if (strcmp(table, "periodxcourse") == 0)
   {

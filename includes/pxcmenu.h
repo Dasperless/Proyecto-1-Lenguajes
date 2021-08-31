@@ -9,12 +9,13 @@ void InfoPeriodMenu();
  * @brief Menu de informacion de cursos
  * 
  */
-void InfoPeriodMenu(){
+void InfoPeriodMenu()
+{
 	int loop = 1;
 	do
 	{
 		printHeader("Informacion de curso por periodo");
-		printMaintMenu("curso por periodo",0);
+		printMaintMenu("curso por periodo", 0);
 
 		char option = inputMenu();
 		switch (option)
@@ -24,10 +25,10 @@ void InfoPeriodMenu(){
 			break;
 		case '2':
 			printFormatedTable("periodxcourse");
-			break;	
+			break;
 		case '3':
 			delPeriodMenu();
-			break;	
+			break;
 		case '4':
 			loop = 0;
 			break;
@@ -43,71 +44,68 @@ void InfoPeriodMenu(){
  * @brief Menu para eliminar cursos.
  * 
  */
-void delPeriodMenu(){
+void delPeriodMenu()
+{
 	printFormatedTable("periodxcourse");
 	printf("\nIngrese el indice a borrar");
 	int id = inputInt();
 
 	char values[16];
-	snprintf(values, sizeof(values), "%d",id);
-	
-	if(callStoredProcedureOutput("SP_DeleteCourseByPeriod",values) < 0)
+	snprintf(values, sizeof(values), "%d", id);
+
+	if (callStoredProcedureOutput("SP_DeleteCourseByPeriod", values) < 0)
 		printf("No existe el id del curso en este periodo");
-	
 }
 
 /**
  * @brief Menu para agregar cursos
  * 
  */
-void addPeriodMenu(){
-	//Falta agregar a la base de datos
-	char courseCode[100] = {0};
-	char year[100];
-	int period;
-	char group[100] = {0};
-	char teacher[100];
-	int numStudents;
+void addPeriodMenu()
+{
+	period newPeriod;
 
 	printFormatedTable("course");
-	printf("Ingrese el codigo del curso\n");	//Obtiene el codigo del curso
+	printf("Ingrese el codigo del curso\n"); //Obtiene el codigo del curso
 	printf("\n>>");
-	scanf("%s", courseCode);
-	
-	printf("Ingrese el anio\n"); 		//Ingresa el anio
-	printf("\n>>");
-	scanf("%s", year);
+	scanf("%s", newPeriod.courseCode);
 
-	printf("Ingrese el periodo\n"); 		//Ingresa el periodo
+	printf("Ingrese el anio\n"); //Ingresa el anio
 	printf("\n>>");
-	scanf("%d", &period);
+	scanf("%s", newPeriod.year);
 
-	printf("Ingrese el group\n"); 		//Ingresa el grupo.
+	printf("Ingrese el periodo\n"); //Ingresa el periodo
 	printf("\n>>");
-	scanf(" %99[^\n]%*[^\n]", group);
+	scanf("%d", &newPeriod.perid);
 
-	printFormatedTable("teacher");	
-	printf("Ingrese el nombre del profesor\n");	
+	printf("Ingrese el group\n"); //Ingresa el grupo.
 	printf("\n>>");
-	scanf(" %99[^\n]%*[^\n]", group);
+	scanf(" %99[^\n]%*[^\n]", newPeriod.group);
 
-	printf("Ingrese el numero de estudiantes\n");	
+	printFormatedTable("teacher");
+	printf("Ingrese el nombre del profesor\n");
 	printf("\n>>");
-	scanf("%d", &numStudents);	
+	scanf(" %99[^\n]%*[^\n]", newPeriod.teacherName);
+
+	printf("Ingrese el numero de estudiantes\n");
+	printf("\n>>");
+	scanf("%d", &newPeriod.numStudents);
 
 	char values[512];
-	snprintf(values, sizeof(values), "'%s', '%s', %d, '%s', '%s', %d",courseCode,year,period,group,teacher,numStudents);
-	int result = callStoredProcedureOutput("SP_InsertCourseByPeriod",values);
-	if(result == -1){ 
+	snprintf(values, sizeof(values), "'%s', '%s', %d, '%s', '%s', %d", newPeriod.courseCode, newPeriod.year, newPeriod.perid, newPeriod.group, newPeriod.teacherName, newPeriod.numStudents);
+	int result = callStoredProcedureOutput("SP_InsertCourseByPeriod", values);
+	if (result == -1)
+	{
 		printf("ya existe un curso con el mismo anio o grupo en este periodo");
-	}else if (result == -2)
+	}
+	else if (result == -2)
 	{
 		printf("existe un curso con el mismo codigo de curso.");
-		
-	}else{
+	}
+	else
+	{
 		printf("Se inserto con exito");
 	}
-	
 }
 
 #endif

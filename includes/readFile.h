@@ -16,20 +16,18 @@ void addClassroomFromFile(char *line)
 		switch (i)
 		{
 		case 0: //Obtiene el nombre
-			name = strtok(line, ",");
-			strcpy(newClassroom->name, name);
+			strcpy(newClassroom->name, strtok(line, ","));
 			break;
 
 		case 1: //Obtiene la capacidad
-			capacity = atoi(strtok(NULL, " "));
-			newClassroom->capacity = capacity;
+			newClassroom->capacity = atoi(strtok(NULL, " "));
 			break;
 		}
 	}
 	if (name != NULL && capacity != 0)
 	{
 		char values[512];
-		snprintf(values, sizeof(values), "'%s', %d", name, capacity);
+		snprintf(values, sizeof(values), "'%s', %d", newClassroom->name, newClassroom->capacity);
 		callStoredProcedure("SP_InsertClassroom", values);
 	}
 }
