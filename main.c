@@ -8,7 +8,6 @@
 #include "includes/structs/teacher.h"
 #include "includes/structs/course.h"
 #include "includes/structs/period.h"
-#include "includes/list.h"
 #include "includes/readFile.h"
 #include "includes/menu.h"
 #include "includes/classmenu.h"
