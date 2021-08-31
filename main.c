@@ -18,6 +18,7 @@
 #include "includes/statisticsMenu.h"
 #include "includes/operativemenu.h"
 #include "includes/generaloptMenu.h"
+
 int main()
 {
 	int loop = 1;

@@ -28,7 +28,7 @@ CREATE TABLE `classroom` (
   `capacity` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,7 +37,6 @@ CREATE TABLE `classroom` (
 
 LOCK TABLES `classroom` WRITE;
 /*!40000 ALTER TABLE `classroom` DISABLE KEYS */;
-INSERT INTO `classroom` VALUES (35,'A1',10),(36,'A2',20),(37,'L2',30);
 /*!40000 ALTER TABLE `classroom` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -64,7 +63,6 @@ CREATE TABLE `course` (
 
 LOCK TABLES `course` WRITE;
 /*!40000 ALTER TABLE `course` DISABLE KEYS */;
-INSERT INTO `course` VALUES (6,'CU1234','CU1234','Curso-1');
 /*!40000 ALTER TABLE `course` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -83,7 +81,11 @@ CREATE TABLE `periodxcourse` (
   `group` varchar(100) NOT NULL,
   `idTeacher` int NOT NULL,
   `studentAmount` int NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_periodxcourse_IdCourse_idx` (`idCourse`),
+  KEY `fk_periodxcourse_idTeacher_idx` (`idTeacher`),
+  CONSTRAINT `fk_periodxcourse_idCourse` FOREIGN KEY (`idCourse`) REFERENCES `course` (`id`),
+  CONSTRAINT `fk_periodxcourse_idTeacher` FOREIGN KEY (`idTeacher`) REFERENCES `teacher` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -93,7 +95,6 @@ CREATE TABLE `periodxcourse` (
 
 LOCK TABLES `periodxcourse` WRITE;
 /*!40000 ALTER TABLE `periodxcourse` DISABLE KEYS */;
-INSERT INTO `periodxcourse` VALUES (9,6,2021,1,'60',17,10);
 /*!40000 ALTER TABLE `periodxcourse` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -111,7 +112,11 @@ CREATE TABLE `reservation` (
   `end_time` time NOT NULL,
   `idClassroom` int NOT NULL,
   `idPeriodXCourse` int NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `fk_reservation_idClassroom_idx` (`idClassroom`),
+  KEY `fk_reservation_idPeriodXCourse_idx` (`idPeriodXCourse`),
+  CONSTRAINT `fk_reservation_idClassroom` FOREIGN KEY (`idClassroom`) REFERENCES `classroom` (`id`),
+  CONSTRAINT `fk_reservation_idPeriodXCourse` FOREIGN KEY (`idPeriodXCourse`) REFERENCES `periodxcourse` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -121,7 +126,6 @@ CREATE TABLE `reservation` (
 
 LOCK TABLES `reservation` WRITE;
 /*!40000 ALTER TABLE `reservation` DISABLE KEYS */;
-INSERT INTO `reservation` VALUES (4,'2021-08-30','07:30:00','08:30:00',35,9),(5,'2021-08-31','07:30:00','08:30:00',35,9),(6,'2021-01-01','07:30:00','08:30:00',35,9),(7,'2021-01-30','07:30:00','08:30:00',36,9),(8,'2021-08-21','07:30:00','08:30:00',37,9),(9,'2021-08-10','07:30:00','08:30:00',35,9),(10,'2021-08-02','07:30:00','08:30:00',37,9);
 /*!40000 ALTER TABLE `reservation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -138,7 +142,7 @@ CREATE TABLE `teacher` (
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cedula_UNIQUE` (`idCard`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -147,7 +151,6 @@ CREATE TABLE `teacher` (
 
 LOCK TABLES `teacher` WRITE;
 /*!40000 ALTER TABLE `teacher` DISABLE KEYS */;
-INSERT INTO `teacher` VALUES (17,117530565,'Dario Vargas');
 /*!40000 ALTER TABLE `teacher` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -646,4 +649,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-30 23:13:25
+-- Dump completed on 2021-08-30 23:58:32
