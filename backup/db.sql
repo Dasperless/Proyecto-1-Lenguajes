@@ -28,7 +28,7 @@ CREATE TABLE `classroom` (
   `capacity` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nombre_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=42 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -37,6 +37,7 @@ CREATE TABLE `classroom` (
 
 LOCK TABLES `classroom` WRITE;
 /*!40000 ALTER TABLE `classroom` DISABLE KEYS */;
+INSERT INTO `classroom` VALUES (39,'A1',10),(40,'A2',20),(41,'L2',30);
 /*!40000 ALTER TABLE `classroom` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -54,7 +55,7 @@ CREATE TABLE `course` (
   `name` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `codigo_curso_UNIQUE` (`courseCode`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -63,6 +64,7 @@ CREATE TABLE `course` (
 
 LOCK TABLES `course` WRITE;
 /*!40000 ALTER TABLE `course` DISABLE KEYS */;
+INSERT INTO `course` VALUES (7,'IC1234','CU1234','curso-1');
 /*!40000 ALTER TABLE `course` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -86,7 +88,7 @@ CREATE TABLE `periodxcourse` (
   KEY `fk_periodxcourse_idTeacher_idx` (`idTeacher`),
   CONSTRAINT `fk_periodxcourse_idCourse` FOREIGN KEY (`idCourse`) REFERENCES `course` (`id`),
   CONSTRAINT `fk_periodxcourse_idTeacher` FOREIGN KEY (`idTeacher`) REFERENCES `teacher` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,6 +97,7 @@ CREATE TABLE `periodxcourse` (
 
 LOCK TABLES `periodxcourse` WRITE;
 /*!40000 ALTER TABLE `periodxcourse` DISABLE KEYS */;
+INSERT INTO `periodxcourse` VALUES (10,7,2021,1,'60',21,10),(11,7,2021,1,'61',24,10);
 /*!40000 ALTER TABLE `periodxcourse` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -117,7 +120,7 @@ CREATE TABLE `reservation` (
   KEY `fk_reservation_idPeriodXCourse_idx` (`idPeriodXCourse`),
   CONSTRAINT `fk_reservation_idClassroom` FOREIGN KEY (`idClassroom`) REFERENCES `classroom` (`id`),
   CONSTRAINT `fk_reservation_idPeriodXCourse` FOREIGN KEY (`idPeriodXCourse`) REFERENCES `periodxcourse` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -126,6 +129,7 @@ CREATE TABLE `reservation` (
 
 LOCK TABLES `reservation` WRITE;
 /*!40000 ALTER TABLE `reservation` DISABLE KEYS */;
+INSERT INTO `reservation` VALUES (12,'2021-08-30','07:30:00','08:30:00',39,10),(13,'2021-08-31','07:30:00','08:30:00',40,10),(14,'2021-08-29','07:30:00','08:30:00',41,10),(15,'2021-08-02','07:30:00','08:30:00',41,11);
 /*!40000 ALTER TABLE `reservation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -142,7 +146,7 @@ CREATE TABLE `teacher` (
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cedula_UNIQUE` (`idCard`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -151,6 +155,7 @@ CREATE TABLE `teacher` (
 
 LOCK TABLES `teacher` WRITE;
 /*!40000 ALTER TABLE `teacher` DISABLE KEYS */;
+INSERT INTO `teacher` VALUES (21,117530566,'Dario Vargas'),(24,22222222,'Daniel Villatoro');
 /*!40000 ALTER TABLE `teacher` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -617,12 +622,13 @@ BEGIN
                         ORDER BY count(R.idClassroom) ASC LIMIT 3; 
 
     ELSEIF letra = 'B' THEN
-        SELECT T.name, count(R.idClassroom) 
-            FROM reservation R, teacher T
-                inner join periodxcourse P on P.id = R.idPeriodXCourse
-                    WHERE T.id = P.idTeacher
-                        GROUP BY T.name
-                            ORDER BY count(R.idClassroom) ASC LIMIT 3; 
+        SELECT T.`name`, count(R.idClassroom) 
+		FROM reservation R
+		inner join periodxcourse P on P.id = R.idPeriodXCourse
+        INNER JOIN teacher T on T.id = P.idTeacher
+		WHERE T.id = P.idTeacher
+		GROUP BY T.name
+		ORDER BY count(R.idClassroom) DESC LIMIT 3; 
 
     ELSE 
         SELECT year, count(year)
@@ -649,4 +655,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-08-30 23:58:32
+-- Dump completed on 2021-08-31  0:32:27

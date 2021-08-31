@@ -17,7 +17,7 @@
 #include "includes/reservation.h"
 #include "includes/statisticsMenu.h"
 #include "includes/operativemenu.h"
-#include "includes/generaloptMenu.h"
+#include "includes/genoptmenu.h"
 
 int main()
 {
